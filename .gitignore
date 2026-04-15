@@ -205,4 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Keep the canonical training dataset available to the repository.
+data/*
+!data/creditcard.csv
+catboost_info/
 data/
