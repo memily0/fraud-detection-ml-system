@@ -1,7 +1,8 @@
 # Fraud Detection ML System
 
 Учебный end-to-end ML/backend проект для оценки вероятности мошеннической транзакции.  
-Репозиторий включает воспроизводимый training pipeline, общий feature engineering для train и inference, FastAPI API, простой dashboard и Docker-обвязку для локального запуска.
+Reproducible fraud detection project with a training pipeline, shared feature engineering for train and inference, FastAPI API, demo dashboard, and Docker setup for local launch.
+
 
 ## Overview
 
@@ -14,7 +15,8 @@
 | Dashboard | Static web UI at `/dashboard/` |
 | Docker | `Dockerfile` + `docker-compose.yml` |
 
-Final serving model: `RandomForestClassifier`, selected through staged model comparison with single-split baseline, stratified cross-validation, and separate threshold tuning.
+Final serving model: `RandomForestClassifier`, selected through staged model comparison with single-split baseline, stratified cross-validation, and separate threshold tuning.  
+**Финальная serving-модель:** `RandomForestClassifier`, выбранная через поэтапное сравнение моделей.
 
 ## Tech Stack
 
@@ -31,18 +33,25 @@ Final serving model: `RandomForestClassifier`, selected through staged model com
 
 ## Project Components
 
-- Reproducible training pipeline from `data/creditcard.csv`
-- Shared feature engineering for training and inference
-- RandomForest serving model for fraud scoring
-- CatBoost baseline kept for model comparison
-- Evaluation on a stratified test split
-- FastAPI service for prediction
-- Simple dashboard for manual inference checks
+## Project Components / Что есть в проекте
+
+- Reproducible training pipeline from `data/creditcard.csv`  
+  (воспроизводимый pipeline обучения)
+- Shared feature engineering for training and inference  
+  (единая логика признаков для train и inference)
+- RandomForest serving model for fraud scoring  
+  (основная модель для скоринга fraud)
+- CatBoost baseline kept for model comparison  
+  (CatBoost сохранён как сильный baseline-кандидат)
+- Evaluation on a stratified test split  
+- FastAPI service for prediction  
+- Simple dashboard for manual inference checks  
 - Docker setup for local demo launch
 
 ## Metrics
 
 Current metrics from the main training pipeline on the test split:
+**Ниже — основные метрики текущей serving-модели на test split.**
 
 | Metric | Value |
 | --- | ---: |
@@ -56,10 +65,13 @@ Current metrics from the main training pipeline on the test split:
 These are the default evaluation metrics at `threshold = 0.5` from the main train/test pipeline.
 The tuned operating threshold for the final `RandomForestClassifier` is reported separately in the **Model Selection** section and is currently `0.2`.
 
-Why these metrics matter:
-- `PR-AUC` is more informative than accuracy for this dataset because fraud cases are rare.
-- `Recall` is important because missing fraudulent transactions is costly.
-- `F2` gives more weight to recall, which fits the fraud detection setting better than a symmetric metric.
+Why these metrics matter / Почему эти метрики важны:
+- `PR-AUC` is more informative than accuracy for this dataset because fraud cases are rare.  
+  (`PR-AUC` важнее accuracy из-за сильного дисбаланса классов.)
+- `Recall` is important because missing fraudulent transactions is costly.  
+  (`Recall` важен, потому что пропуск fraud-операции дорогой.)
+- `F2` gives more weight to recall, which fits the fraud detection setting better than a symmetric metric.  
+  (`F2` сильнее акцентирует recall.)
 
 ## Quick Start
 
@@ -113,7 +125,10 @@ Current model parameters:
 - `n_jobs=-1`
 - `random_state=42`
 
-## Model Selection
+## Model Selection / Как выбиралась инальная модель
+
+This project uses a process-driven model selection approach.  
+**Выбор модели здесь сделан как отдельный осознанный процесс, а не как разовое решение по одному запуску.**
 
 Model selection in this project was done in stages rather than by intuition alone.
 
@@ -123,10 +138,14 @@ Model selection in this project was done in stages rather than by intuition alon
 4. After shortlist selection, **threshold tuning** was performed separately on a validation split using `F2`.
 5. Based on this process, `RandomForestClassifier` was chosen as the final serving model.
 
-Model selection summary:
+Model selection summary / Кратко:
 - single-split benchmark is kept as a fast baseline comparison;
 - cross-validation benchmark is the main source of model selection;
 - `CatBoostClassifier` remains in the repository as a strong benchmark candidate, not as the final serving model.
+
+- single-split benchmark сохранён как быстрый baseline;
+- CV benchmark используется как основной этап выбора модели;
+- `CatBoostClassifier` остался в проекте как сильный кандидат, но не как финальная serving-модель.
 
 Cross-validation benchmark summary:
 
@@ -148,7 +167,7 @@ This threshold analysis is intentionally kept separate from model selection:
 - operating threshold selection is based on `F2` for shortlisted models on a separate validation split;
 - for the final serving model, the tuned operating threshold is `0.2`, while the headline training metrics above are still reported at the default `0.5`.
 
-## Feature Engineering
+## Feature Engineering / Построение признаков
 
 The model uses 33 features.
 
@@ -162,8 +181,9 @@ Derived features:
 - `log_amount` — `log1p(Amount)` to reduce the effect of a long-tailed amount distribution
 - `time_bin` — categorical time bucket: `night`, `morning`, `afternoon`, `evening`
 
-Important detail:
+Important detail / Важный момент:
 - the same feature engineering logic is reused for both training and inference, so train and serve stay aligned.
+- одна и та же логика признаков используется и при обучении, и при инференсе, поэтому нет train/inference mismatch.
 
 ## API
 
@@ -171,7 +191,7 @@ Important detail:
 
 Redirects to the dashboard:
 
-- `http://localhost:8000/` → `http://localhost:8000/dashboard/`
+- `http://localhost:8000/` -> `http://localhost:8000/dashboard/`
 
 ### `GET /health`
 
@@ -358,7 +378,7 @@ After startup:
 Current Docker limitation:
 - this setup is intended for local demo usage and still copies both `models/` and `data/` into the container.
 
-## Limitations
+## Limitations / Ограничения
 
 - this is a study/demo project, not a production deployment;
 - the API expects PCA-style dataset features `V1` ... `V28`, not raw transaction fields;
@@ -379,12 +399,20 @@ Current Docker limitation:
 - richer dashboard explanations
 - saved metrics report and a short model card
 
-## Skills Demonstrated
+## Skills Demonstrated / Что показывает проект 
 
-- tabular ML for imbalanced classification
-- reproducible model training pipeline
-- process-driven model selection with baseline benchmark, CV benchmark, and threshold tuning
-- shared feature engineering for train and inference
-- FastAPI service for model inference
-- model packaging and local deployment with Docker
-- presenting an ML project end-to-end for portfolio and interview discussion
+- tabular ML for imbalanced classification  
+- reproducible model training pipeline  
+- process-driven model selection with baseline benchmark, CV benchmark, and threshold tuning  
+- shared feature engineering for train and inference  
+- FastAPI service for model inference  
+- model packaging and local deployment with Docker  
+- presenting an ML project end-to-end for portfolio and interview discussion  
+
+
+- работа с табличными данными и сильным дисбалансом классов
+- воспроизводимый pipeline обучения
+- осознанный выбор модели через benchmark + CV + threshold tuning
+- согласование train и inference
+- ML-serving через FastAPI
+- упаковка проекта в Docker
