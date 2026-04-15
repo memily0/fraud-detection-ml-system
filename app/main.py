@@ -13,9 +13,10 @@ app = FastAPI(title="Fraud Detection API")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DASHBOARD_DIR = BASE_DIR / "dashboard"
+MODEL_PATH = BASE_DIR / "models" / "random_forest_fraud_model.joblib"
 app.mount("/dashboard", StaticFiles(directory=DASHBOARD_DIR, html=True), name="dashboard")
 
-model = load_model("models/catboost_fraud_model.cbm")
+model = load_model(MODEL_PATH)
 
 
 class PredictionRequest(BaseModel):
